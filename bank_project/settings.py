@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'currency',
     'corsheaders',
     'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -63,10 +64,25 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
 
 ROOT_URLCONF = 'bank_project.urls'
+
+
+INSTALLED_APPS += ['rest_framework_simplejwt.token_blacklist']
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+
+
+# AUTH_USER_MODEL = "users.CustomUser"
+
 
 TEMPLATES = [
     {

@@ -31,14 +31,13 @@ class TransactionCreateView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-
-class IncomeReportView(ListAPIView):
+class CombinedReportView(ListAPIView):
     serializer_class = TransactionSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TransactionFilter
 
     def get_queryset(self):
-        return Transaction.objects.filter(type=Transaction.INCOME).order_by('-date')
+        return Transaction.objects.all().order_by('-date')
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -48,28 +47,7 @@ class IncomeReportView(ListAPIView):
             openapi.Parameter('amount_max', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
             openapi.Parameter('date_after', openapi.IN_QUERY, type=openapi.TYPE_STRING),
             openapi.Parameter('date_before', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-        ]
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class ExpenseReportView(ListAPIView):
-    serializer_class = TransactionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = TransactionFilter
-
-    def get_queryset(self):
-        return Transaction.objects.filter(type=Transaction.EXPENSE).order_by('-date')
-
-    @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('category', openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
-            openapi.Parameter('category_name', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('amount_min', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('amount_max', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('date_after', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('date_before', openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter('type', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="INCOME или EXPENSE"),
         ]
     )
     def get(self, request, *args, **kwargs):

@@ -1,9 +1,8 @@
 from django.urls import path
 from .views import TransactionCreateView
-from .views import IncomeReportView, ExpenseReportView
+from .views import CombinedReportView
 
 urlpatterns = [
-    path('upload/', TransactionCreateView.as_view(), name='transactions-upload'),
-    path("income/", IncomeReportView.as_view(), name="income_report"),
-    path("expense/", ExpenseReportView.as_view(), name="expense_report"),
+    path("transactions/", TransactionCreateView.as_view(), name="create_transaction"),
+    path("transactions/list/", CombinedReportView.as_view(), name="income_expense_list"),
 ]

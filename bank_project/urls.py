@@ -28,5 +28,5 @@ urlpatterns = [
     path('transactions/', include('transactions.urls')),  
 
     # Currency — кейс 7
-    path('currency/', include('currency.urls')),
+    path('currency/', include('currency.urls')), 
 ]
