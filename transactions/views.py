@@ -31,24 +31,56 @@ class TransactionCreateView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
+
 class CombinedReportView(ListAPIView):
     serializer_class = TransactionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = TransactionFilter
-
-    def get_queryset(self):
-        return Transaction.objects.all().order_by('-date')
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('category', openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
-            openapi.Parameter('category_name', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('amount_min', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('amount_max', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
-            openapi.Parameter('date_after', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('date_before', openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter('type', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="INCOME или EXPENSE"),
+            openapi.Parameter('category', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            openapi.Parameter('category_name', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False),
+            openapi.Parameter('amount_min', openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=False),
+            openapi.Parameter('amount_max', openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=False),
+            openapi.Parameter('date_after', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False),
+            openapi.Parameter('date_before', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False),
+            openapi.Parameter('type', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False),
         ]
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        # Всегда возвращаем все фильтры с пустыми значениями, если пользователь их не заполнил
+        filters = {
+            "category": request.query_params.get("category", None),
+            "category_name": request.query_params.get("category_name", ""),
+            "amount_min": request.query_params.get("amount_min", None),
+            "amount_max": request.query_params.get("amount_max", None),
+            "date_after": request.query_params.get("date_after", ""),
+            "date_before": request.query_params.get("date_before", ""),
+            "type": request.query_params.get("type", ""),
+        }
+        return Response({
+            "filters": filters,
+            "transactions": serializer.data
+        })
+
+    def get_queryset(self):
+        queryset = Transaction.objects.all().order_by('-date')
+        params = self.request.query_params
+
+        if params.get('category'):
+            queryset = queryset.filter(category_id=params['category'])
+        if params.get('category_name'):
+            queryset = queryset.filter(category__name__icontains=params['category_name'])
+        if params.get('type') in [Transaction.INCOME, Transaction.EXPENSE]:
+            queryset = queryset.filter(type=params['type'])
+        if params.get('amount_min'):
+            queryset = queryset.filter(amount__gte=float(params['amount_min']))
+        if params.get('amount_max'):
+            queryset = queryset.filter(amount__lte=float(params['amount_max']))
+        if params.get('date_after'):
+            queryset = queryset.filter(date__gte=params['date_after'])
+        if params.get('date_before'):
+            queryset = queryset.filter(date__lte=params['date_before'])
+
+        return queryset

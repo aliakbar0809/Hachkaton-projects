@@ -34,7 +34,7 @@ class DailyCurrencyRatesView(APIView):
             if not rates:
                 return Response({"error": "Нет курсов для базовой валюты", "raw": data}, status=500)
 
-            # Фиксируем нужные валюты
+            
             filtered = {}
             for k in ["usd", "eur", "rub", "tjs"]:
                 if k in rates:
