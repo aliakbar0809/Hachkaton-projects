@@ -49,7 +49,6 @@ class CombinedReportView(ListAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-        # Всегда возвращаем все фильтры с пустыми значениями, если пользователь их не заполнил
         filters = {
             "category": request.query_params.get("category", None),
             "category_name": request.query_params.get("category_name", ""),
