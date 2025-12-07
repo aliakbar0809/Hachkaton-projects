@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'transactions',
     'currency',
     'corsheaders',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,12 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ]
+}
 
 ROOT_URLCONF = 'bank_project.urls'
 
